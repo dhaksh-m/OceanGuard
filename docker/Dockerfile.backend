@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies for GIS & raster IO
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    gdal-bin \
+    libgdal-dev \
+    curl \
+    && rm -rf /var/lib/apt/get/lists/*
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend /app/backend
+COPY ml /app/ml
+COPY ocean /app/ocean
+COPY ais /app/ais
+COPY attribution /app/attribution
+COPY reports /app/reports
+
+ENV PYTHONPATH=/app:/app/backend
+
+EXPOSE 8000
+
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
