@@ -18,7 +18,7 @@ export const MetricsBar: React.FC = () => {
         <div>
           <div style={{ fontSize: '10px', color: '#6f8496', textTransform: 'uppercase' }}>Slick Extent Area</div>
           <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#e43d3d' }}>
-            {activeIncident.slick_area_km2} km²
+            {segmentation?.metrics.area_km2 ?? activeIncident.slick_area_km2} km²
           </div>
         </div>
 
