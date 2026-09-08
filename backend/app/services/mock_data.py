@@ -1,5 +1,10 @@
 from datetime import datetime, timedelta
 
+
+# ============================================================
+# MOCK INCIDENTS
+# ============================================================
+
 MOCK_INCIDENTS = [
     {
         "id": "INC-2026-0901",
@@ -15,9 +20,13 @@ MOCK_INCIDENTS = [
         "sar_confidence": 0.94,
         "lookalike_probability": 0.06,
         "estimated_age_hours": 5.5,
-        "scene_id": "S1A_IW_GRDH_1SDV_20260902T141520",
-        "primary_vessel_of_interest_id": "VESSEL-001"
+
+        # Real local SAR image
+        "scene_id": "wakashio_reef",
+
+        "primary_vessel_of_interest_id": "VESSEL-001",
     },
+
     {
         "id": "INC-2026-0894",
         "code": "OG-SPILL-0894",
@@ -32,9 +41,15 @@ MOCK_INCIDENTS = [
         "sar_confidence": 0.89,
         "lookalike_probability": 0.11,
         "estimated_age_hours": 12.0,
-        "scene_id": "S1B_IW_GRDH_1SDV_20260901T224010",
-        "primary_vessel_of_interest_id": "VESSEL-003"
+
+        # CHANGED:
+        # The original S1B scene does not exist locally.
+        # Connect this incident to the real local demo image.
+        "scene_id": "kota_suria_pass",
+
+        "primary_vessel_of_interest_id": "VESSEL-003",
     },
+
     {
         "id": "INC-2026-0881",
         "code": "OG-SPILL-0881",
@@ -49,10 +64,18 @@ MOCK_INCIDENTS = [
         "sar_confidence": 0.96,
         "lookalike_probability": 0.04,
         "estimated_age_hours": 8.0,
-        "scene_id": "S1A_IW_GRDH_1SDV_20260831T061000",
-        "primary_vessel_of_interest_id": "VESSEL-002"
-    }
+
+        # Real local SAR image
+        "scene_id": "dht_edelweiss_pass",
+
+        "primary_vessel_of_interest_id": "VESSEL-002",
+    },
 ]
+
+
+# ============================================================
+# MOCK VESSELS
+# ============================================================
 
 MOCK_VESSELS = [
     {
@@ -65,8 +88,9 @@ MOCK_VESSELS = [
         "length_m": 274.0,
         "breadth_m": 48.0,
         "callsign": "A8XX9",
-        "status": "UNDERWAY_USING_ENGINE"
+        "status": "UNDERWAY_USING_ENGINE",
     },
+
     {
         "id": "VESSEL-002",
         "mmsi": 352001928,
@@ -77,8 +101,9 @@ MOCK_VESSELS = [
         "length_m": 183.0,
         "breadth_m": 32.2,
         "callsign": "3FEW8",
-        "status": "UNDERWAY_USING_ENGINE"
+        "status": "UNDERWAY_USING_ENGINE",
     },
+
     {
         "id": "VESSEL-003",
         "mmsi": 477291000,
@@ -89,8 +114,9 @@ MOCK_VESSELS = [
         "length_m": 334.0,
         "breadth_m": 45.8,
         "callsign": "VRQK5",
-        "status": "UNDERWAY_USING_ENGINE"
+        "status": "UNDERWAY_USING_ENGINE",
     },
+
     {
         "id": "VESSEL-004",
         "mmsi": 235109400,
@@ -101,28 +127,37 @@ MOCK_VESSELS = [
         "length_m": 229.0,
         "breadth_m": 32.2,
         "callsign": "2GHT9",
-        "status": "UNDERWAY_USING_ENGINE"
-    }
+        "status": "UNDERWAY_USING_ENGINE",
+    },
 ]
+
+
+# ============================================================
+# MOCK SATELLITE SCENES
+# ============================================================
+# These are local demo scenes bundled with the project.
+# Each incident points to a DIFFERENT SAR image so the real ML
+# model produces different predictions for each incident.
 
 MOCK_SATELLITE_SCENES = [
     {
         "id": "SCENE-001",
-        "scene_id": "S1A_IW_GRDH_1SDV_20260902T141520",
+        "scene_id": "wakashio_reef",
         "platform": "Sentinel-1A",
         "mode": "IW",
         "polarization": "VV+VH",
         "acquisition_time": "2026-09-02T14:15:20Z",
         "pass_direction": "ASCENDING",
         "spatial_resolution_m": 10.0,
+        # Demo geographic extent for the local sample.
         "bbox": [103.70, 1.15, 104.05, 1.40],
         "processing_status": "COMPLETED",
-        "storage_uri": "s3://oceanguard-scenes/2026/09/02/S1A_IW_20260902.tif"
+        "storage_uri": "local://wakashio_reef.jpg",
     },
     {
         "id": "SCENE-002",
-        "scene_id": "S1B_IW_GRDH_1SDV_20260901T224010",
-        "platform": "Sentinel-1B",
+        "scene_id": "kota_suria_pass",
+        "platform": "Sentinel-1A",
         "mode": "IW",
         "polarization": "VV+VH",
         "acquisition_time": "2026-09-01T22:40:10Z",
@@ -130,6 +165,19 @@ MOCK_SATELLITE_SCENES = [
         "spatial_resolution_m": 10.0,
         "bbox": [103.60, 1.10, 103.95, 1.35],
         "processing_status": "COMPLETED",
-        "storage_uri": "s3://oceanguard-scenes/2026/09/01/S1B_IW_20260901.tif"
-    }
+        "storage_uri": "local://kota_suria_pass.jpg",
+    },
+    {
+        "id": "SCENE-003",
+        "scene_id": "dht_edelweiss_pass",
+        "platform": "Sentinel-1A",
+        "mode": "IW",
+        "polarization": "VV+VH",
+        "acquisition_time": "2026-08-31T06:10:00Z",
+        "pass_direction": "DESCENDING",
+        "spatial_resolution_m": 10.0,
+        "bbox": [103.81, 1.22, 103.95, 1.34],
+        "processing_status": "COMPLETED",
+        "storage_uri": "local://dht_edelweiss_pass.jpg",
+    },
 ]

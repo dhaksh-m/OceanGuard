@@ -31,14 +31,28 @@ export async function createIncident(data: { name: string; region: string; latit
   return res.json();
 }
 
-export async function fetchSegmentation(incidentId: string): Promise<SegmentationResult> {
+export async function fetchSegmentation(
+  incidentId: string
+): Promise<SegmentationResult> {
   const res = await fetch(`${API_BASE}/segmentation/predict`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ incident_id: incidentId })
   });
-  if (!res.ok) throw new Error('Failed to run segmentation prediction');
-  return res.json();
+
+  const responseText = await res.text();
+
+  if (!res.ok) {
+    throw new Error(
+      `Segmentation failed (${res.status}): ${responseText}`
+    );
+  }
+
+  try {
+    return JSON.parse(responseText) as SegmentationResult;
+  } catch {
+    throw new Error('Segmentation API returned invalid JSON');
+  }
 }
 
 export async function fetchOceanDrift(incidentId: string, lat: number, lon: number): Promise<OceanDriftResult> {

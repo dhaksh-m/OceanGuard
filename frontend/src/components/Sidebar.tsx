@@ -15,13 +15,14 @@ import { useIncidentStore } from '../store/useIncidentStore';
 
 export const Sidebar: React.FC = () => {
   const { 
-    incidents, 
-    activeIncident, 
-    selectIncident, 
-    layers, 
-    toggleLayer,
-    isLoading 
-  } = useIncidentStore();
+  incidents, 
+  activeIncident, 
+  segmentation,
+  selectIncident, 
+  layers, 
+  toggleLayer,
+  isLoading 
+} = useIncidentStore();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -127,9 +128,24 @@ export const Sidebar: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#6f8496', borderTop: '1px solid #1e3449', paddingTop: '6px' }}>
-                <span>Area: <strong style={{ color: '#e43d3d' }}>{inc.slick_area_km2} km²</strong></span>
-                <span>Confidence: <strong style={{ color: '#36c879' }}>{Math.round(inc.sar_confidence * 100)}%</strong></span>
-              </div>
+  <span>
+    Area:{' '}
+    <strong style={{ color: '#e43d3d' }}>
+      {isActive && segmentation
+        ? `${segmentation.metrics.area_km2} km²`
+        : `${inc.slick_area_km2} km²`}
+    </strong>
+  </span>
+
+  <span>
+    Confidence:{' '}
+    <strong style={{ color: '#36c879' }}>
+      {isActive && segmentation
+        ? `${Math.round(segmentation.confidence * 100)}%`
+        : `${Math.round(inc.sar_confidence * 100)}%`}
+    </strong>
+  </span>
+</div>
             </div>
           );
         })}
