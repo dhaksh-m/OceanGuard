@@ -2,30 +2,27 @@
 __pycache__/
 *.py[cod]
 *.pyo
-.venv/
-venv/
+.pytest_cache/
 
-# Environment
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables
 .env
 .env.*
-!.env.example
 
-# Frontend
-frontend/node_modules/
-frontend/dist/
+# Node
+node_modules/
 
-# Archives
-*.zip
-
-# IDE
-.vscode/
-.idea/
+# Frontend build
+dist/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Generated ML/output files
-backend/data/masks/
-
-dist/
+# IDE
+.vscode/
+.idea/
