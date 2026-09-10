@@ -1,0 +1,12 @@
+node_modules
+dist
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
+data/
+checkpoints/
+.cache
+.env
+.env.local

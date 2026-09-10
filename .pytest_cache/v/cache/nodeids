@@ -1,0 +1,14 @@
+[
+  "backend/tests/test_api.py::test_ais_vessels_and_tracks",
+  "backend/tests/test_api.py::test_attribution_calculation",
+  "backend/tests/test_api.py::test_create_and_update_incident",
+  "backend/tests/test_api.py::test_evidence_locker",
+  "backend/tests/test_api.py::test_get_incident_by_id",
+  "backend/tests/test_api.py::test_get_incidents",
+  "backend/tests/test_api.py::test_ocean_drift_simulation",
+  "backend/tests/test_api.py::test_reports_generation",
+  "backend/tests/test_api.py::test_root_endpoint",
+  "backend/tests/test_api.py::test_satellite_scenes",
+  "backend/tests/test_api.py::test_segmentation_prediction",
+  "backend/tests/test_api.py::test_system_health"
+]

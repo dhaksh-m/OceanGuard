@@ -1,0 +1,61 @@
+services:
+  # --- Backend API (FastAPI) ---
+  - type: web
+    name: oceanguard-backend
+    env: docker
+    plan: starter
+    dockerfilePath: ./docker/Dockerfile.backend
+    dockerContext: .
+    region: singapore
+    healthCheckPath: /healthz
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHONPATH
+        value: /app:/app/backend
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: PORT
+        value: 8000
+      # Optional live AIS (set in Render dashboard)
+      # - key: AISSTREAM_API_KEY
+      #   sync: false
+      - key: POSTGRES_SERVER
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+    autoDeploy: false
+
+  # --- Frontend Static (alternative to Vercel - use if you want Render to host frontend) ---
+  # Comment out if deploying frontend to Vercel
+  - type: web
+    name: oceanguard-frontend
+    env: docker
+    plan: starter
+    dockerfilePath: ./docker/Dockerfile.frontend
+    dockerContext: ./frontend
+    region: singapore
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://oceanguard-backend.onrender.com/api/v1
+      - key: VITE_WS_BASE_URL
+        value: wss://oceanguard-backend.onrender.com/ws/telemetry
+    autoDeploy: false
+
+# Optional managed data stores (uncomment if you need persistent DB)
+# - type: pserv
+#   name: oceanguard-db
+#   env: docker
+#   dockerCommand: postgres
+#   plan: starter
+#   ipAllowList: []
+
+databases:
+  - name: oceanguard-db
+    plan: starter
+    databaseName: oceanguard_db
+    user: oceanguard
+    region: singapore
+
+# For local docker-compose auto-start: `docker-compose up --build` (restart: always)
+# On Render, services auto-restart on failure and auto-deploy on git push if autoDeploy: true

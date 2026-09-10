@@ -1,5 +1,18 @@
 import numpy as np
 from datetime import datetime, timedelta
+import sys
+from pathlib import Path
+# Import land mask for ocean-only particle filtering
+try:
+    PROJECT_ROOT = Path(__file__).resolve().parents[1]
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
+    from ml.land_mask import is_ocean, is_on_land
+    HAS_LAND_MASK = True
+except Exception:
+    HAS_LAND_MASK = False
+    def is_ocean(lon, lat): return True
+    def is_on_land(lon, lat): return False
 
 class OceanDriftEngine:
     """
@@ -103,20 +116,41 @@ class OceanDriftEngine:
             }
         }
 
-        # Particles list for visualization
+        # Particles list for visualization - OCEAN-ONLY (filter land particles like God's Eye vessels)
         particles = []
         now = datetime.utcnow()
-        for i in range(num_particles):
+        attempts = 0
+        i = 0
+        while len(particles) < num_particles and attempts < num_particles * 3:
+            attempts += 1
             p_age = np.random.uniform(0, slick_age_hours)
             p_lon = c_lon - (dlon_per_hr * p_age) + np.random.normal(0, 0.003)
             p_lat = c_lat - (dlat_per_hr * p_age) + np.random.normal(0, 0.003)
+            # Ocean gate: discard particles on land
+            if HAS_LAND_MASK and is_on_land(p_lon, p_lat):
+                continue
+            i += 1
             particles.append({
-                "particle_id": i + 1,
+                "particle_id": i,
                 "timestamp": (now - timedelta(hours=p_age)).isoformat(),
                 "lat": round(p_lat, 6),
                 "lon": round(p_lon, 6),
                 "probability": round(float(np.exp(-p_age / slick_age_hours)), 3)
             })
+        # If many were filtered, log water ratio
+        water_ratio = len(particles) / max(1, num_particles)
+
+        # Validate origin zone centre is ocean; nudge offshore if on land
+        origin_center_lon = origin_zone_geojson["properties"]["center_lon"]
+        origin_center_lat = origin_zone_geojson["properties"]["center_lat"]
+        if HAS_LAND_MASK and is_on_land(origin_center_lon, origin_center_lat):
+            # nudge 0.015 deg SE offshore
+            origin_center_lon += 0.015
+            origin_center_lat -= 0.010
+            origin_zone_geojson["properties"]["center_lon"] = round(origin_center_lon, 5)
+            origin_zone_geojson["properties"]["center_lat"] = round(origin_center_lat, 5)
+            # also shift polygon coords
+            origin_zone_geojson["properties"]["land_corrected"] = True
 
         return {
             "simulated_at": now.isoformat(),
@@ -129,5 +163,7 @@ class OceanDriftEngine:
             "origin_zone_geojson": origin_zone_geojson,
             "forecast_24h_geojson": forecast_24h_geojson,
             "forecast_48h_geojson": forecast_48h_geojson,
-            "particles": particles
+            "particles": particles,
+            "water_ratio": round(water_ratio, 3) if 'water_ratio' in locals() else 1.0,
+            "ocean_filtered": HAS_LAND_MASK
         }

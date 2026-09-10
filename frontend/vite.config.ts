@@ -16,5 +16,7 @@ export default defineConfig({
         ws: true,
       }
     }
-  }
+  },
+  preview: { port: 3000, host: true },
+  build: { outDir: 'dist' },
 });

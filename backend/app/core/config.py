@@ -8,9 +8,14 @@ class Settings(BaseSettings):
     
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    PORT: int = int(os.getenv("PORT", "8000"))
     
-    # Cors
-    ALLOWED_ORIGINS: list = ["*"]
+    # Cors - for Vercel frontend allow all, tighten via ALLOWED_ORIGINS env if needed
+    ALLOWED_ORIGINS: list = os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]
+
+    # Database (Render Postgres provides DATABASE_URL)
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
 
     # Attribution weights
     WEIGHT_SPATIAL: float = 0.25

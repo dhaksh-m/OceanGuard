@@ -23,10 +23,12 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS
+# Configure CORS - allow Vercel frontend
+# In production set ALLOWED_ORIGINS=https://your-frontend.vercel.app,https://oceanguard.onrender.com
+origins = settings.ALLOWED_ORIGINS if settings.ALLOWED_ORIGINS != ["*"] else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,40 +46,56 @@ def root():
         "version": settings.VERSION
     }
 
-# WebSocket for real-time AIS & incident updates
+# WebSocket for real-time AIS & incident updates (God's Eye smooth streaming)
 @app.websocket("/ws/telemetry")
 async def websocket_telemetry_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
+        from app.services.ais_connector import get_live_ais_feed
+        from app.services.gods_eye_adapter import SENSOR_STYLES
         step = 0
         while True:
-            # Broadcast mock live vessel position updates
             step += 1
+            live = get_live_ais_feed()
+            # Broadcast God's Eye compatible payload
             data = {
                 "type": "VESSEL_TELEMETRY_UPDATE",
                 "step": step,
+                "timestamp": live.get("timestamp"),
+                "source": live.get("source"),
+                "sensor_style": "normal",
                 "vessels": [
                     {
-                        "mmsi": 636018432,
-                        "name": "PACIFIC EXPLORER",
-                        "lat": round(1.3120 + (step * 0.0002), 5),
-                        "lon": round(103.8540 + (step * 0.0003), 5),
-                        "speed_knots": 5.4,
-                        "heading_deg": 68.0
-                    },
-                    {
-                        "mmsi": 352001928,
-                        "name": "OCEAN GEMINI",
-                        "lat": round(1.2400 + (step * 0.0005), 5),
-                        "lon": round(103.7900 + (step * 0.0006), 5),
-                        "speed_knots": 12.8,
-                        "heading_deg": 72.0
-                    }
-                ]
+                        "mmsi": v["mmsi"],
+                        "name": v["name"],
+                        "lat": v["latitude"],
+                        "lon": v["longitude"],
+                        "speed_knots": v["speed_knots"],
+                        "heading_deg": v["heading_deg"],
+                        "course_deg": v.get("course_deg", v["heading_deg"]),
+                        "trail": v.get("trail", []),
+                        "world_stable_heading": v.get("world_stable_heading", v["heading_deg"]),
+                        "threat_score": v.get("threat_score"),
+                        "ship_type": v.get("ship_type"),
+                        "flag": v.get("flag")
+                    } for v in live.get("vessels", [])
+                ],
+                "provenance": live.get("provenance"),
+                "hud": {
+                    "sensor_styles": list(SENSOR_STYLES.keys()),
+                    "detection_overlay": True
+                }
             }
             await websocket.send_text(json.dumps(data))
-            await asyncio.sleep(4.0)
+            await asyncio.sleep(2.5)  # God's Eye: 2.5s ticker matches frontend
     except WebSocketDisconnect:
         pass
-    except Exception:
-        pass
+    except Exception as e:
+        try:
+            await websocket.close(code=1011, reason=str(e)[:100])
+        except Exception:
+            pass
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok", "version": settings.VERSION}

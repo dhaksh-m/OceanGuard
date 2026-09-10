@@ -63,7 +63,10 @@ class SegmentationResult(BaseModel):
     lookalike_score: float
     is_spill: bool
     metrics: SpillGeometryMetrics
-    polygon_geojson: Dict[str, Any]
+    polygon_geojson: Optional[Dict[str, Any]] = None
+    water_ratio: Optional[float] = None
+    land_mask_provenance: Optional[Dict[str, Any]] = None
+    model_config = {"extra": "allow"}
 
 class DriftParticle(BaseModel):
     particle_id: int

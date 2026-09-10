@@ -46,7 +46,9 @@ export interface SegmentationResult {
   lookalike_score: number;
   is_spill: boolean;
   metrics: SpillGeometryMetrics;
-  polygon_geojson: any;
+  polygon_geojson: any | null;
+  water_ratio?: number;
+  land_mask_provenance?: any;
 }
 
 export interface DriftParticle {

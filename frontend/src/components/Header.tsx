@@ -5,7 +5,10 @@ import {
   FileText, 
   PlusCircle, 
   Activity, 
-  Anchor 
+  Anchor,
+  Eye,
+  Crosshair,
+  Satellite
 } from 'lucide-react';
 import { useIncidentStore } from '../store/useIncidentStore';
 
@@ -17,7 +20,13 @@ export const Header: React.FC = () => {
     setReportModalOpen, 
     setIngestModalOpen, 
     setHealthDrawerOpen,
-    isLoading 
+    isLoading,
+    sensorMode,
+    isCockpitMode,
+    followedMmsi,
+    wsConnected,
+    liveVessels,
+    segmentation
   } = useIncidentStore();
 
   return (
@@ -43,10 +52,21 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        <div className="badge-live">
+        <div className="badge-live" title={wsConnected ? 'WebSocket LIVE' : 'Polling'}>
           <span className="pulse-dot" />
-          <span>● LIVE MONITORING</span>
+          <span>● {wsConnected ? 'LIVE • WS' : 'LIVE'} • {liveVessels.length} CONTACTS</span>
         </div>
+        {/* God's Eye mode badge */}
+        <div style={{ background: sensorMode !== 'normal' ? 'rgba(22,119,232,0.18)' : 'rgba(50,199,232,0.12)', border: `1px solid ${sensorMode!=='normal'? '#1677e8' : '#1e3449'}`, color: sensorMode!=='normal' ? '#32c7e8' : '#9fb2c3', padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <Satellite size={12} />
+          <span>GOD'S EYE {sensorMode.toUpperCase()}</span>
+        </div>
+        {isCockpitMode && (
+          <div style={{ background: 'rgba(255,59,48,0.18)', border: '1px solid #ff3b30', color: '#ff9f1c', padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Crosshair size={12} />
+            <span>COCKPIT MMSI {followedMmsi}</span>
+          </div>
+        )}
       </div>
 
       {/* Incident Switcher & Action Controls */}
